@@ -59,6 +59,6 @@ testing in current security testing tools:
 [nuclei's lack of WebSocket support](https://github.com/projectdiscovery/nuclei/issues/539),
 and [nmap's lack of WebSocket support](https://seclists.org/nmap-dev/2015/q1/134))
 2. Burp Suite lacks support for WebSocket extensions (for example, see [this PortSwigger forum thread](https://forum.portswigger.net/thread/websockets-api-support-c8e1660b9f0ab) and [this one](https://forum.portswigger.net/thread/websocket-api-07e77f9ee3dd58552eb770)).
-3. There is a lack of deeper WebSocket-specific security research (the [Awesome WebSockets Security repository](https://github.com/PalindromeLabs/awesome-websockets-security) lists published WebSockets security research)
+3. There is a lack of deeper WebSocket-specific security research (the [Awesome WebSockets Security repository](https://github.com/PalindromeLabs/awesome-websocket-security) lists published WebSockets security research)
 4. The proliferation of WebSockets around the modern web (as seen in the results
 of the STEWS discovery tool)
