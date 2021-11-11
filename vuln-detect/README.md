@@ -12,7 +12,7 @@ The tool currently supports tests for vulnerabilities including:
 
 A more complete list of CVEs that this tool might support in the future
 can be found in the
-[Awesome WebSockets Security repository](https://github.com/PalindromeLabs/awesome-websockets-security).
+[Awesome WebSocket Security repository](https://github.com/PalindromeLabs/awesome-websocket-security).
 
 ## Basic Usage
 

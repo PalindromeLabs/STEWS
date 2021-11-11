@@ -106,6 +106,7 @@ the following table illustrates the number of servers
 discovered that supported WebSockets for each URL pattern.
 The xxx characters imply a variety of TLDs were tested.
 
+<!-- markdown-link-check-disable -->
 | URL                       |  WebSocket servers found   |
 | :------------------------ | :------------------------  |
 | domain.xxx                |            2281            |
@@ -119,6 +120,7 @@ The xxx characters imply a variety of TLDs were tested.
 | ws.domain.xxx             |            891             |
 | stream.domain.xxx         |            574             |
 | **Total**                 |         **12819**          |
+<!-- markdown-link-check-enable -->
 
 ## Areas for future work
 
