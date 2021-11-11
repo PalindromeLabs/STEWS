@@ -5,7 +5,7 @@
 STEWS is a tool suite for security testing of WebSockets
 
 This research was first presented at
-[OWASP Global AppSec USA 2021](https://owaspglobalappsecus2021.sched.com/event/n98a/were-not-in-http-anymore-investigating-websocket-server-security)
+[OWASP Global AppSec US 2021](https://owaspglobalappsecus2021.sched.com/event/n98a/were-not-in-http-anymore-investigating-websocket-server-security)
 
 ## Features
 STEWS provides the ability to:
@@ -15,10 +15,10 @@ STEWS provides the ability to:
 
 The included whitepaper in this repository provides further details of
 the research undertaken.
-The included slide deck was presented at OWASP AppSec USA 2021.
+The included slide deck was presented at OWASP AppSec US 2021.
 
 Complementary respositories created as part of this research include:
-- The [Awesome WebSockets Security repository](https://github.com/PalindromeLabs/awesome-websockets-security), which compiles WebSockets security information
+- The [Awesome WebSockets Security repository](https://github.com/PalindromeLabs/awesome-websocket-security), which compiles WebSockets security information
 for future researchers
 - The [WebSockets-Playground repository](https://github.com/PalindromeLabs/WebSockets-Playground), which is a script to easily jump start
 multiple local WebSocket servers in parallel
