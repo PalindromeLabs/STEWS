@@ -50,6 +50,6 @@ to run test 4 on a local server on port 8084, you can run:
 
 ## Areas for future work
 
-1. Add additional CVE detection tests based on list of CVEs in [Awesome WebSockets Security repository](https://github.com/PalindromeLabs/awesome-websockets-security)
+1. Add additional CVE detection tests based on list of CVEs in [Awesome WebSocket Security repository](https://github.com/PalindromeLabs/awesome-websocket-security)
 2. Add test for [WebSocket smuggling](https://github.com/0ang3el/websocket-smuggle)
 3. Add tests for misconfigurations (e.g. WebSocket protocol JSON input issues)
