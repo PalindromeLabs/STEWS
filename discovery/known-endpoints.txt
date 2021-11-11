@@ -1,0 +1,17 @@
+tsock.us1.twilio.com/v3/wsconnect
+streamer.finance.yahoo.com
+streaming.vn.teslamotors.com/streaming/
+alive.github.com/_sockets/u/6261182/ws
+testnet-explorer.binance.org/ws/block
+testnet-explorer.binance.org/ws/chain
+explorer.binance.org/ws/chain
+explorer.binance.org/ws/block
+testnet-explorer.binance.org/ws/tx
+fstream.binance.com
+stream.binance.com/stream
+stream.binance.com:9443/stream
+ws-feed-public.sandbox.pro.coinbase.com
+ws-feed.pro.coinbase.com
+deriv-stream.crypto.com/v1/market
+stream.crypto.com/v2/user
+stream.crypto.com/v2/market
