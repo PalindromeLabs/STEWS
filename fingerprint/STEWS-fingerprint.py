@@ -13,9 +13,10 @@ opcode_summary = []
 close_summary = []
 mask_summary = []
 bad_input_summary = []
-debug=False
-cntn_timeout=3
-send_delay=1
+debug = False
+cntn_timeout = 3
+send_delay = 1
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Security Testing and Enumeration of WebSockets (STEWS) Fingerprinting Tool")
@@ -53,12 +54,14 @@ def parse_args():
                         help="Run the 700-series (hybi and similar) tests")
     return parser.parse_args()
 
+
 def print_opcode(opcode, recvdata):
     print("  >>opcode: ", websocket.ABNF.OPCODE_MAP[opcode])
     if opcode == websocket.ABNF.OPCODE_TEXT:
         print("  >>recvdata: ", recvdata.decode("utf-8"))
     else:
         print("  >>recvdata: ", recvdata)
+
 
 def ws_reconnect(ws, wsurl, opts, options):
     try:
@@ -71,10 +74,11 @@ def ws_reconnect(ws, wsurl, opts, options):
 # Opcode field fingerprinting
 ################################
 
+
 def opcode_send(ws, opcode):
     global debug
     time.sleep(send_delay)
-    msg="'"
+    msg = "'"
     # Send an opcode. Return 1 if response received, 0 if not
     try:
         ws.send(msg, opcode)
@@ -94,17 +98,18 @@ def opcode_send(ws, opcode):
                 print_opcode(resp_opcode2, resp_msg2)
             # Only use resp_msg2 and resp_opcode2 if resp_msg2 clearly contains an error message
             if list(bytes(resp_msg2))[0] == 3 and list(bytes(resp_msg2))[1] == 234:
-                 resp_opcode = resp_opcode2
-                 resp_msg = resp_msg2
+                resp_opcode = resp_opcode2
+                resp_msg = resp_msg2
         except Exception as e:
             print("Opcode " + websocket.ABNF.OPCODE_MAP[opcode] + " exception in secondary message: ", e)
-        if len(resp_msg.decode('UTF8', 'ignore')) > 10: # length of 10 is arbitrary, maybe should decrease
+        if len(resp_msg.decode('UTF8', 'ignore')) > 10:  # length of 10 is arbitrary, maybe should decrease
             return resp_msg
         else:
             return 1
     except Exception as e:
         print("Opcode " + websocket.ABNF.OPCODE_MAP[opcode] + " exception: ", e)
         return 0
+
 
 # Send opcode value of 0x1 (text)
 def test_100(ws, wsurl, opts, options):
@@ -113,12 +118,14 @@ def test_100(ws, wsurl, opts, options):
     ws_reconnect(ws, wsurl, opts, options)
     return opcode_send(ws, websocket.ABNF.OPCODE_TEXT)
 
+
 # Send opcode value of 0x2 (binary)
 def test_101(ws, wsurl, opts, options):
     if debug:
         print("test 101")
     ws_reconnect(ws, wsurl, opts, options)
     return opcode_send(ws, websocket.ABNF.OPCODE_BINARY)
+
 
 # Send opcode value of 0x9 (ping)
 def test_102(ws, wsurl, opts, options):
@@ -127,12 +134,14 @@ def test_102(ws, wsurl, opts, options):
     ws_reconnect(ws, wsurl, opts, options)
     return opcode_send(ws, websocket.ABNF.OPCODE_PING)
 
+
 # Send opcode value of 0xa (pong)
 def test_103(ws, wsurl, opts, options):
     if debug:
         print("test 103")
     ws_reconnect(ws, wsurl, opts, options)
     return opcode_send(ws, websocket.ABNF.OPCODE_PONG)
+
 
 # Send opcode value of 0x0 (continue)
 def test_104(ws, wsurl, opts, options):
@@ -141,12 +150,14 @@ def test_104(ws, wsurl, opts, options):
     ws_reconnect(ws, wsurl, opts, options)
     return opcode_send(ws, websocket.ABNF.OPCODE_CONT)
 
+
 # Send opcode value of 0xa (pong)
 def test_105(ws, wsurl, opts, options):
     if debug:
         print("test 105")
     ws_reconnect(ws, wsurl, opts, options)
     return opcode_send(ws, websocket.ABNF.OPCODE_CLOSE)
+
 
 def run_1xx_tests(ws, wsurl, opts, options):
     results_1xx = {}
@@ -163,10 +174,11 @@ def run_1xx_tests(ws, wsurl, opts, options):
 # Reserved bit fingerprinting
 ################################
 
+
 def rsv_send(ws, rsv_bit1, rsv_bit2, rsv_bit3):
     global debug
     time.sleep(send_delay)
-    msg="'"
+    msg = "'"
     fin = 1
     opcode = websocket.ABNF.OPCODE_BINARY
     # Reconnect in case connection is closed
@@ -189,11 +201,11 @@ def rsv_send(ws, rsv_bit1, rsv_bit2, rsv_bit3):
                 print("   >>>SENT rsv bits " + str(rsv_bit1) + ", " + str(rsv_bit2) + ", " + str(rsv_bit3))
                 print_opcode(resp_opcode2, resp_msg2)
             if (list(bytes(resp_msg2))[0] == 3 and list(bytes(resp_msg2))[1] == 234) or len(resp_msg2) > len(resp_msg):
-                 resp_opcode = resp_opcode2
-                 resp_msg = resp_msg2
+                resp_opcode = resp_opcode2
+                resp_msg = resp_msg2
         except Exception as e:
             print("Opcode " + websocket.ABNF.OPCODE_MAP[opcode] + " exception in secondary message: ", e)
-        if len(resp_msg.decode('UTF8', 'ignore')) > 10: # limit of 10 is arbitrary
+        if len(resp_msg.decode('UTF8', 'ignore')) > 10:  # limit of 10 is arbitrary
             return resp_msg
         else:
             return 1
@@ -201,11 +213,13 @@ def rsv_send(ws, rsv_bit1, rsv_bit2, rsv_bit3):
         print("rsv bits " + str(rsv_bit1) + ", " + str(rsv_bit2) + ", " + str(rsv_bit3) + " exception: ", e)
         return 0
 
+
 def test_200(ws, wsurl, opts, options):
     if debug:
         print("test 200")
     ws_reconnect(ws, wsurl, opts, options)
     return rsv_send(ws, 0, 0, 1)
+
 
 def test_201(ws, wsurl, opts, options):
     if debug:
@@ -213,11 +227,13 @@ def test_201(ws, wsurl, opts, options):
     ws_reconnect(ws, wsurl, opts, options)
     return rsv_send(ws, 0, 1, 0)
 
+
 def test_202(ws, wsurl, opts, options):
     if debug:
         print("test 202")
     ws_reconnect(ws, wsurl, opts, options)
     return rsv_send(ws, 0, 1, 1)
+
 
 def test_203(ws, wsurl, opts, options):
     if debug:
@@ -225,11 +241,13 @@ def test_203(ws, wsurl, opts, options):
     ws_reconnect(ws, wsurl, opts, options)
     return rsv_send(ws, 1, 0, 0)
 
+
 def test_204(ws, wsurl, opts, options):
     if debug:
         print("test 204")
     ws_reconnect(ws, wsurl, opts, options)
     return rsv_send(ws, 1, 0, 1)
+
 
 def test_205(ws, wsurl, opts, options):
     if debug:
@@ -237,11 +255,13 @@ def test_205(ws, wsurl, opts, options):
     ws_reconnect(ws, wsurl, opts, options)
     return rsv_send(ws, 1, 1, 0)
 
+
 def test_206(ws, wsurl, opts, options):
     if debug:
         print("test 206")
     ws_reconnect(ws, wsurl, opts, options)
     return rsv_send(ws, 1, 1, 1)
+
 
 def run_2xx_tests(ws, wsurl, opts, options):
     results_2xx = {}
@@ -259,12 +279,13 @@ def run_2xx_tests(ws, wsurl, opts, options):
 # Handshake Headers
 ################################
 
+
 def version_try_connect(ws, ws_ver, wsurl, opts, options):
-    msg="'"
+    msg = "'"
     options["header"] = {'Sec-WebSocket-Version': str(ws_ver)}
     try:
         ws_reconnect(ws, wsurl, opts, options)
-        ws.send(msg) # This results in an exception if connection was not established
+        ws.send(msg)  # This results in an exception if connection was not established
         return 1
     except Exception as e:
         print("Exception while trying to connect for version: " + str(ws_ver), e)
@@ -280,7 +301,6 @@ def pretty_print_GET(http_req):
 
 def list_of_headers(ws, wsurl, opts, options):
     global debug
-    msg="'"
     headers = {'Upgrade': 'websocket', 'Origin': options["origin"], 'Sec-WebSocket-Key': 'U2NqiNJpRpRGdvagcfySUA==', 'Connection': 'Upgrade', 'Sec-WebSocket-Version': '13'}
     httpurl = ""
     # Convert ws:// URL to http:// URL
@@ -295,11 +315,10 @@ def list_of_headers(ws, wsurl, opts, options):
     prepared = req.prepare()
     if debug:
         pretty_print_GET(prepared)
-    try: # Try connecting to endpoint
+    try:  # Try connecting to endpoint
         resp = requests.get(httpurl,headers=headers,timeout=cntn_timeout)
         if debug:
             print("Response headers: ", resp.headers)
-        return_value = 0
         if resp.status_code == 101:
             return resp.headers
         else:
@@ -308,6 +327,7 @@ def list_of_headers(ws, wsurl, opts, options):
     except Exception as e:
         print("Exception while trying to connect for subprotocol tests: ", e)
         return []
+
 
 def header_evaluator(header_dict):
     for header_title, header_value in header_dict.items():
@@ -319,7 +339,7 @@ def header_evaluator(header_dict):
         elif header_title.lower().find("server") >= 0 and \
             (header_value.lower().find("python") >= 0 or header_value.lower().find("websockets") >= 0):
             return 3
-        elif header_title.lower().find("server")  >= 0 and \
+        elif header_title.lower().find("server") >= 0 and \
             (header_value.lower().find("tootallnate") >= 0 or header_value.lower().find("Java-WebSocket") >= 0):
             return 4
         elif header_title.lower().find("server") >= 0 and \
@@ -329,50 +349,60 @@ def header_evaluator(header_dict):
             return 6
     return 0
 
+
 def test_300(ws, wsurl, opts, options):
     if debug:
         print("test 300")
     return version_try_connect(ws, 7, wsurl, opts, options)
+
 
 def test_301(ws, wsurl, opts, options):
     if debug:
         print("test 301")
     return version_try_connect(ws, 8, wsurl, opts, options)
 
+
 def test_302(ws, wsurl, opts, options):
     if debug:
         print("test 302")
     return version_try_connect(ws, "13;", wsurl, opts, options)
+
 
 def test_303(ws, wsurl, opts, options):
     if debug:
         print("test 303")
     return version_try_connect(ws, "13,14,15", wsurl, opts, options)
 
+
 def test_304(ws, wsurl, opts, options):
     if debug:
         print("test 304")
     return version_try_connect(ws, "13-", wsurl, opts, options)
+
 
 def test_305(ws, wsurl, opts, options):
     if debug:
         print("test 305")
     return version_try_connect(ws, "13\n", wsurl, opts, options)
 
+
 def test_306(ws, wsurl, opts, options):
     if debug:
         print("test 306")
     return version_try_connect(ws, "13\r", wsurl, opts, options)
+
 
 def test_307(ws, wsurl, opts, options):
     if debug:
         print("test 307")
     return version_try_connect(ws, "13\\", wsurl, opts, options)
 
+
 def test_308(ws, wsurl, opts, options):
     if debug:
         print("test 308")
     return version_try_connect(ws, "13\/", wsurl, opts, options)
+
 
 def test_309(ws, wsurl, opts, options):
     if debug:
@@ -383,6 +413,7 @@ def test_309(ws, wsurl, opts, options):
     else:
         return header_evaluator(all_headers)
 
+
 def test_310(ws, wsurl, opts, options):
     if debug:
         print("test 310")
@@ -390,6 +421,7 @@ def test_310(ws, wsurl, opts, options):
         return 1
     else:
         return 0
+
 
 def run_3xx_tests(ws, wsurl, opts, options):
     results_3xx = {}
@@ -411,8 +443,8 @@ def run_3xx_tests(ws, wsurl, opts, options):
 # Extensions
 ################################
 
+
 def extension_try_connect(ext, ws, wsurl, opts, options):
-    msg="'"
     headers = {'Upgrade': 'websocket', 'Origin': options["origin"], 'Sec-WebSocket-Key': 'U2NqiNJpRpRGdvagcfySUA==', 'Connection': 'Upgrade', 'Sec-WebSocket-Version': '13', 'Sec-WebSocket-Extensions': ext}
     httpurl = ""
     # Replace the WebSocket URL with a HTTP URL
@@ -425,7 +457,7 @@ def extension_try_connect(ext, ws, wsurl, opts, options):
     prepared = req.prepare()
     if debug:
         pretty_print_GET(prepared)
-    try: # Try connecting to endpoint
+    try:  # Try connecting to endpoint
         resp = requests.get(httpurl,headers=headers,timeout=cntn_timeout)
         if debug:
             print("Response headers: ", resp.headers)
@@ -445,35 +477,41 @@ def extension_try_connect(ext, ws, wsurl, opts, options):
 def test_400(ws, wsurl, opts, options):
     if debug:
         print("test 400")
-    ws_extensions=['permessage-deflate', 'deflate-frame', 'bbf-usp-protocol', 'superspeed', 'colormode', 'client_max_window_bits', 'server_max_window_bits=10', 'mux', 'x-webkit-deflate-frame']
+    ws_extensions = ['permessage-deflate', 'deflate-frame', 'bbf-usp-protocol', 'superspeed', 'colormode', 'client_max_window_bits', 'server_max_window_bits=10', 'mux', 'x-webkit-deflate-frame']
     return extension_try_connect(', '.join(ws_extensions), ws, wsurl, opts, options)
+
 
 def test_401(ws, wsurl, opts, options):
     if debug:
         print("test 401")
-    ws_extensions=['permessage-deflate', 'deflate-frame', 'bbf-usp-protocol', 'superspeed', 'colormode', 'client_max_window_bits', 'server_max_window_bits=10', 'mux', 'x-webkit-deflate-frame']
+    ws_extensions = ['permessage-deflate', 'deflate-frame', 'bbf-usp-protocol', 'superspeed', 'colormode', 'client_max_window_bits', 'server_max_window_bits=10', 'mux', 'x-webkit-deflate-frame']
     ws_extensions.reverse()
     return extension_try_connect(', '.join(ws_extensions), ws, wsurl, opts, options)
+
 
 def test_402(ws, wsurl, opts, options):
     if debug:
         print("test 402")
     return extension_try_connect("permessage-deflate; client_max_window_bits", ws, wsurl, opts, options)
 
+
 def test_403(ws, wsurl, opts, options):
     if debug:
         print("test 403")
     return extension_try_connect("permessage-deflate; client_max_window_bits; server_max_window_bits=7", ws, wsurl, opts, options)
+
 
 def test_404(ws, wsurl, opts, options):
     if debug:
         print("test 404")
     return extension_try_connect("permessage-deflate; client_max_window_bits; server_max_window_bits=16", ws, wsurl, opts, options)
 
+
 def test_405(ws, wsurl, opts, options):
     if debug:
         print("test 405")
     return extension_try_connect("permessage-deflate; client_max_window_bits; server_max_window_bits=08", ws, wsurl, opts, options)
+
 
 def run_4xx_tests(ws, wsurl, opts, options):
     results_4xx = {}
@@ -483,7 +521,6 @@ def run_4xx_tests(ws, wsurl, opts, options):
     results_4xx['403'] = test_400(ws, wsurl, opts, options)
     results_4xx['404'] = test_400(ws, wsurl, opts, options)
     results_4xx['405'] = test_400(ws, wsurl, opts, options)
-    #test_individual_extensions
     return results_4xx
 
 ################################
@@ -491,8 +528,8 @@ def run_4xx_tests(ws, wsurl, opts, options):
 # Subprotocols
 ################################
 
+
 def protocol_try_connect(protocol, ws, wsurl, opts, options):
-    msg="'"
     headers = {'Upgrade': 'websocket', 'Origin': options["origin"], 'Sec-WebSocket-Key': 'U2NqiNJpRpRGdvagcfySUA==', 'Connection': 'Upgrade', 'Sec-WebSocket-Version': '13', 'Sec-WebSocket-Protocol': protocol}
     httpurl = ""
     # Replace the WebSocket URL with a HTTP URL
@@ -505,7 +542,7 @@ def protocol_try_connect(protocol, ws, wsurl, opts, options):
     prepared = req.prepare()
     if debug:
         pretty_print_GET(prepared)
-    try: # Try connecting to endpoint
+    try:  # Try connecting to endpoint
         resp = requests.get(httpurl,headers=headers,timeout=cntn_timeout)
         if debug:
             print("Response headers: ", resp.headers)
@@ -525,15 +562,17 @@ def protocol_try_connect(protocol, ws, wsurl, opts, options):
 def test_500(ws, wsurl, opts, options):
     if debug:
         print("test 500")
-    subprotocol_list=['MBWS.huawei.com','MBLWS.huawei.com','soap','wamp','v10.stomp','v11.stomp','v12.stomp','ocpp1.2','ocpp1.5','ocpp1.6','ocpp2.0','ocpp2.0.1','rfb','sip','notificationchannel-netapi-rest.openmobilealliance.org','wpcp','amqp','mqtt','jsflow','rwpcp','xmpp','ship','mielecloudconnect','v10.pcp.sap.com','msrp','v1.saltyrtc.org','TLCP-2.0.0.lightstreamer.com','bfcp','sldp.softvelum.com','opcua+uacp','opcua+uajson','v1.swindon-lattice+json','v1.usp','mles-websocket','coap','TLCP-2.1.0.lightstreamer.com','sqlnet.oracle.com','oneM2M.R2.0.json','oneM2M.R2.0.xml','oneM2M.R2.0.cbor','transit','2016.serverpush.dash.mpeg.org','2018.mmt.mpeg.org','clue','webrtc.softvelum.com','cobra.v2.json','drp','hub.bsc.bacnet.org','dc.bsc.bacnet.org','jmap','t140','done','TLCP-2.2.0.lightstreamer.com','collection-update','zap-protocol-v1','chat','superchat','echo-protocol','graphql-ws','graphql-transport-ws','null','webtty','ISYSUB']
+    subprotocol_list = ['MBWS.huawei.com','MBLWS.huawei.com','soap','wamp','v10.stomp','v11.stomp','v12.stomp','ocpp1.2','ocpp1.5','ocpp1.6','ocpp2.0','ocpp2.0.1','rfb','sip','notificationchannel-netapi-rest.openmobilealliance.org','wpcp','amqp','mqtt','jsflow','rwpcp','xmpp','ship','mielecloudconnect','v10.pcp.sap.com','msrp','v1.saltyrtc.org','TLCP-2.0.0.lightstreamer.com','bfcp','sldp.softvelum.com','opcua+uacp','opcua+uajson','v1.swindon-lattice+json','v1.usp','mles-websocket','coap','TLCP-2.1.0.lightstreamer.com','sqlnet.oracle.com','oneM2M.R2.0.json','oneM2M.R2.0.xml','oneM2M.R2.0.cbor','transit','2016.serverpush.dash.mpeg.org','2018.mmt.mpeg.org','clue','webrtc.softvelum.com','cobra.v2.json','drp','hub.bsc.bacnet.org','dc.bsc.bacnet.org','jmap','t140','done','TLCP-2.2.0.lightstreamer.com','collection-update','zap-protocol-v1','chat','superchat','echo-protocol','graphql-ws','graphql-transport-ws','null','webtty','ISYSUB']
     return protocol_try_connect(",".join(map(str, subprotocol_list)), ws, wsurl, opts, options)
+
 
 def test_501(ws, wsurl, opts, options):
     if debug:
         print("test 501")
-    subprotocol_list=['MBWS.huawei.com','MBLWS.huawei.com','soap','wamp','v10.stomp','v11.stomp','v12.stomp','ocpp1.2','ocpp1.5','ocpp1.6','ocpp2.0','ocpp2.0.1','rfb','sip','notificationchannel-netapi-rest.openmobilealliance.org','wpcp','amqp','mqtt','jsflow','rwpcp','xmpp','ship','mielecloudconnect','v10.pcp.sap.com','msrp','v1.saltyrtc.org','TLCP-2.0.0.lightstreamer.com','bfcp','sldp.softvelum.com','opcua+uacp','opcua+uajson','v1.swindon-lattice+json','v1.usp','mles-websocket','coap','TLCP-2.1.0.lightstreamer.com','sqlnet.oracle.com','oneM2M.R2.0.json','oneM2M.R2.0.xml','oneM2M.R2.0.cbor','transit','2016.serverpush.dash.mpeg.org','2018.mmt.mpeg.org','clue','webrtc.softvelum.com','cobra.v2.json','drp','hub.bsc.bacnet.org','dc.bsc.bacnet.org','jmap','t140','done','TLCP-2.2.0.lightstreamer.com','collection-update','zap-protocol-v1','chat','superchat','echo-protocol','graphql-ws','graphql-transport-ws','null','webtty','ISYSUB']
+    subprotocol_list = ['MBWS.huawei.com','MBLWS.huawei.com','soap','wamp','v10.stomp','v11.stomp','v12.stomp','ocpp1.2','ocpp1.5','ocpp1.6','ocpp2.0','ocpp2.0.1','rfb','sip','notificationchannel-netapi-rest.openmobilealliance.org','wpcp','amqp','mqtt','jsflow','rwpcp','xmpp','ship','mielecloudconnect','v10.pcp.sap.com','msrp','v1.saltyrtc.org','TLCP-2.0.0.lightstreamer.com','bfcp','sldp.softvelum.com','opcua+uacp','opcua+uajson','v1.swindon-lattice+json','v1.usp','mles-websocket','coap','TLCP-2.1.0.lightstreamer.com','sqlnet.oracle.com','oneM2M.R2.0.json','oneM2M.R2.0.xml','oneM2M.R2.0.cbor','transit','2016.serverpush.dash.mpeg.org','2018.mmt.mpeg.org','clue','webrtc.softvelum.com','cobra.v2.json','drp','hub.bsc.bacnet.org','dc.bsc.bacnet.org','jmap','t140','done','TLCP-2.2.0.lightstreamer.com','collection-update','zap-protocol-v1','chat','superchat','echo-protocol','graphql-ws','graphql-transport-ws','null','webtty','ISYSUB']
     subprotocol_list.reverse()
     return protocol_try_connect(",".join(map(str, subprotocol_list)), ws, wsurl, opts, options)
+
 
 def run_5xx_tests(ws, wsurl, opts, options):
     results_5xx = {}
@@ -546,10 +585,11 @@ def run_5xx_tests(ws, wsurl, opts, options):
 # long payload lengths
 ################################
 
+
 def max_payloads(verbose, ws, wsurl, opts, options):
     results_6xx = {}
     # Generate long inputs of the following lengths
-    long_inputs=[100, 1048576, 1048577, 5095577, 10000000, 16777216, 16777217, 67108863, 67108864, 100000000, 100000001, 104857600, 104857601]
+    long_inputs = [100, 1048576, 1048577, 5095577, 10000000, 16777216, 16777217, 67108863, 67108864, 100000000, 100000001, 104857600, 104857601]
     # Test long inputs
     testcase = 600
     # Always disable tracing here, otherwise log/terminal gets flooded
@@ -560,7 +600,7 @@ def max_payloads(verbose, ws, wsurl, opts, options):
         # First try to reconnect if connection is lost
         ws_reconnect(ws, wsurl, opts, options)
         try:
-            ws.send("a"*length)
+            ws.send("a" * length)
             results_6xx[str(testcase)] = 1
             testcase += 1
         except Exception as e:
@@ -571,6 +611,7 @@ def max_payloads(verbose, ws, wsurl, opts, options):
     if verbose:
         websocket.enableTrace(True)
     return results_6xx
+
 
 def run_6xx_tests(verbose, ws, wsurl, opts, options):
     if debug:
@@ -590,7 +631,7 @@ def send_req(req, wsurl, opts):
     port = urlparse(wsurl).port or (80 if urlparse(wsurl).scheme == "ws" else 443)
 
     # Prepare socket
-    data=""
+    data = ""
     context = ssl.SSLContext(opts.get('ssl_version', ssl.PROTOCOL_TLS))
     context.verify_mode = opts.get('cert_reqs', ssl.CERT_NONE)
 
@@ -598,7 +639,7 @@ def send_req(req, wsurl, opts):
         with socket.create_connection((host, port)) as sock:
             sock.settimeout(cntn_timeout)
             with context.wrap_socket(sock, server_hostname=host) as ssock:
-                ssock.sendall(req) # ssock.connect((host, int(port)))
+                ssock.sendall(req)
                 data = ssock.recv(4096)
     elif urlparse(wsurl).scheme == "ws":
         ssock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -669,10 +710,10 @@ def test_701(ws, wsurl, opts, options):
     )
     return send_req(req, wsurl, opts)
 
+
 def test_702(ws, wsurl, opts, options):
     if debug:
         print("test 702")
-    path = urlparse(wsurl).path or "/"
     # hybi-XX connection attempt
     req = (
         b"HTTP/1.1 101 WebSocket Protocol Handshake\r\n" +
@@ -683,6 +724,7 @@ def test_702(ws, wsurl, opts, options):
         b"\r\n"
     )
     return send_req(req, wsurl, opts)
+
 
 def test_703(ws, wsurl, opts, options):
     if debug:
@@ -702,6 +744,7 @@ def test_703(ws, wsurl, opts, options):
     )
     return send_req(req, wsurl, opts)
 
+
 def test_704(ws, wsurl, opts, options):
     if debug:
         print("test 704")
@@ -719,6 +762,7 @@ def test_704(ws, wsurl, opts, options):
         b"^n:ds[4U\r\n"
     )
     return send_req(req, wsurl, opts)
+
 
 def test_705(ws, wsurl, opts, options):
     if debug:
@@ -847,11 +891,13 @@ def run_tests(arguments):
 
     return full_fingerprint
 
+
 def resultsEqual(dbValue, testValue):
     if dbValue == testValue:
         return 0
     else:
         return 1
+
 
 def resultsContain(dbValue, testValue):
     if isinstance(testValue, int):
@@ -861,7 +907,6 @@ def resultsContain(dbValue, testValue):
             # Attached greater weighter because matching
             # strings are more indicative of a match
             return 2
-            #return 1
     else:
         if str(testValue).find(str(dbValue)) >= 0:
             return 0
@@ -869,7 +914,7 @@ def resultsContain(dbValue, testValue):
             # Attached greater weighter because matching
             # strings are more indicative of a match
             return 2
-            #return 1
+
 
 def first_best_match(deltas, servers, max_delta):
     min_delta = min(deltas)
@@ -877,9 +922,10 @@ def first_best_match(deltas, servers, max_delta):
     for i in range(len(deltas)):
         if deltas[i] == min_delta:
             candidate_servers.append(servers[i])
-    percent_match = 100 * float(1 - min_delta/max_delta)
+    percent_match = 100 * float(1 - min_delta / max_delta)
     return_string = ', '.join(candidate_servers) + " -- % match: " + str(percent_match)
     return return_string
+
 
 def second_best_match(deltas, servers, max_delta):
     min_delta = min(deltas)
@@ -898,76 +944,77 @@ def second_best_match(deltas, servers, max_delta):
         for i in range(len(deltas)):
             if deltas[i] == new_min_delta:
                 candidate_servers.append(servers[i])
-        percent_match = 100 * float(1 - new_min_delta/max_delta)
+        percent_match = 100 * float(1 - new_min_delta / max_delta)
         return_string = ', '.join(candidate_servers) + " -- % match: " + str(percent_match)
         return return_string
 
+
 def identify_fingerprint(unknown_fingerprint):
     fingerprintDB = [
-    # URL #1: NodeJS ws (port 8081 of WebSockets-Playground)
-    {'100': 1, '101': 1, '102': 1, '103': 1, '104': 1, '105': 1,
-        '200': 1, '201': 1, '202': 1, '203': 1, '204': 1, '205': 1, '206': 1,
-        '300': 0, '301': 1, '302': 0, '303': 0, '304': 0, '305': 1, '306': 0, '307': 0, '308': 0, '309': 0, '310': 0,
-        '400': 0, '401': 0, '402': 0, '403': 0, '404': 0, '405': 0,
-        '500': 'MBWS.huawei.com', '501': 'ISYSUB',
-        '600': 0, '601': 0, '602': 0, '603': 0, '604': 0, '605': 0, '606': 0, '607': 0, '608': 0, '609': 0, '610': 0, '611': 0, '612': 0,
-        '700': 'Bad Request', '701': 'Bad Request', '702': '400', '703': 'Bad Request', '704': 'Bad Request', '705': 'Bad Request'},
-    # URL #2: faye (port 7000 of WebSockets-Playground)
-    {'100': 1, '101': 1, '102': 0, '103': 0, '104': 'Received unexpected continuation frame', '105': 1,
-        '200': 'One or more reserved bits are on: reserved1 = 0, reserved2 = 0, reserved3 = 1', '201': 'One or more reserved bits are on: reserved1 = 0, reserved2 = 0, reserved3 = 1', '202': 'One or more reserved bits are on: reserved1 = 0, reserved2 = 0, reserved3 = 1', '203': 'One or more reserved bits are on: reserved1 = 0, reserved2 = 0, reserved3 = 1', '204': 'One or more reserved bits are on: reserved1 = 0, reserved2 = 0, reserved3 = 1', '205': 'One or more reserved bits are on: reserved1 = 0, reserved2 = 0, reserved3 = 1', '206': 'One or more reserved bits are on: reserved1 = 0, reserved2 = 0, reserved3 = 1',
-        '300': 1, '301': 1, '302': 1, '303': 1, '304': 1, '305': 1, '306': 0, '307': 1, '308': 1, '309': 0, '310': 0,
-        '400': 0, '401': 0, '402': 0, '403': 0, '404': 0, '405': 0,
-        '500': 0, '501': 0,
-        '600': 1, '601': 1, '602': 1, '603': 1, '604': 1, '605': 1, '606': 1, '607': 1, '608': 0, '609': 0, '610': 0, '611': 0, '612': 0,
-        '700': '101', '701': '101', '702': '400', '703': '101', '704': 'yTFHc]O', '705': '101'},
-    # URL #3: Gorilla (port 8084 of WebSockets-Playground)
-    {'100': 1, '101': 1, '102': 0, '103': 0, '104': 'continuation after final message frame', '105': 1,
-        '200': 'unexpected reserved bits 0x10', '201': 'unexpected reserved bits 0x10', '202': 'unexpected reserved bits 0x10', '203': 'unexpected reserved bits 0x10', '204': 'unexpected reserved bits 0x10', '205': 'unexpected reserved bits 0x10', '206': 'unexpected reserved bits 0x10',
-        '300': 0, '301': 0, '302': 0, '303': 1, '304': 0, '305': 0, '306': 0, '307': 0, '308': 0, '309': 0, '310': 0,
-        '400': 0, '401': 0, '402': 0, '403': 0, '404': 0, '405': 0,
-        '500': 0, '501': 0,
-        '600': 0, '601': 0, '602': 0, '603': 0, '604': 0, '605': 0, '606': 0, '607': 0, '608': 0, '609': 0, '610': 0, '611': 0, '612': 0,
-        '700': 'Bad Request', '701': 'Bad Request', '702': '400 Bad Request', '703': 'Bad Request', '704': 'Bad Request', '705': '400 Bad Request: missing required Host header'},
-    # URL #4: uWebSockets (port 9001 of WebSockets-Playground)
-    {'100': 1, '101': 1, '102': 0, '103': 0, '104': 0, '105': 1,
-        '200': 0, '201': 0, '202': 0, '203': 0, '204': 0, '205': 0, '206': 0,
-        '300': 1, '301': 1, '302': 1, '303': 1, '304': 1, '305': 1, '306': 0, '307': 1, '308': 1, '309': 1, '310': 0,
-        '400': 'permessage-deflate; client_no_context_takeover; server_no_context_takeover', '401': 'permessage-deflate; client_no_context_takeover; server_no_context_takeover', '402': 'permessage-deflate; client_no_context_takeover; server_no_context_takeover', '403': 'permessage-deflate; client_no_context_takeover; server_no_context_takeover', '404': 'permessage-deflate; client_no_context_takeover; server_no_context_takeover', '405': 'permessage-deflate; client_no_context_takeover; server_no_context_takeover',
-        '500': 'MBWS.huawei.com', '501': 'ISYSUB',
-        '600': 1, '601': 1, '602': 1, '603': 1, '604': 1, '605': 1, '606': 0, '607': 0, '608': 0, '609': 0, '610': 0, '611': 0, '612': 0,
-        '700': '101', '701': '101', '702': 0, '703': 0, '704': 0, '705': 0},
-    # URL #5: Java Spring boot (port 8080 of WebSockets-Playground)
-    {'100': 0, '101': 0, '102': 0, '103': 0, '104': 'A WebSocket frame was sent with an unrecognised opCode of [0]', '105': 'The client sent a close frame with a single byte payload which is not valid',
-        '200': 'The client frame set the reserved bits to [1] for a message with opCode [2] which was not supported by this endpoint', '201': 'The client frame set the reserved bits to [1] for a message with opCode [2] which was not supported by this endpoint', '202': 'The client frame set the reserved bits to [1] for a message with opCode [2] which was not supported by this endpoint', '203': 'The client frame set the reserved bits to [1] for a message with opCode [2] which was not supported by this endpoint', '204': 'The client frame set the reserved bits to [1] for a message with opCode [2] which was not supported by this endpoint', '205': 'The client frame set the reserved bits to [1] for a message with opCode [2] which was not supported by this endpoint', '206': 'The client frame set the reserved bits to [1] for a message with opCode [2] which was not supported by this endpoint',
-        '300': 0, '301': 0, '302': 0, '303': 0, '304': 0, '305': 0, '306': 1, '307': 0, '308': 0, '309': 0, '310': 0,
-        '400': 'permessage-deflate', '401': 'permessage-deflate', '402': 'permessage-deflate', '403': 'permessage-deflate', '404': 'permessage-deflate', '405': 'permessage-deflate',
-        '500': 0, '501': 0,
-        '600': 0, '601': 0, '602': 0, '603': 0, '604': 0, '605': 0, '606': 0, '607': 0, '608': 0, '609': 0, '610': 0, '611': 0, '612': 0,
-        '700': '426', '701': 'Can "Upgrade" only to "WebSocket".', '702': 'Bad Request', '703': '403', '704': 'Bad Request', '705': 'Bad Request'},
-    # URL #6: Python websockets (port 8765 of WebSockets-Playground)
-    {'100': 1, '101': 1, '102': 0, '103': 0, '104': 1, '105': 1,
-        '200': 1, '201': 1, '202': 1, '203': 1, '204': 1, '205': 1, '206': 1,
-        '300': 0, '301': 0, '302': 0, '303': 0, '304': 0, '305': 0, '306': 0, '307': 0, '308': 0, '309': 3, '310': 0,
-        '400': -1, '401': -1, '402': -1, '403': -1, '404': -1, '405': -1,
-        '500': 0, '501': 0,
-        '600': 0, '601': 0, '602': 0, '603': 0, '604': 0, '605': 0, '606': 0, '607': 0, '608': 0, '609': 0, '610': 0, '611': 0, '612': 0,
-        '700': 'Failed to open a WebSocket connection: empty Sec-WebSocket-Version header.', '701': 'You cannot access a WebSocket server directly with a browser. You need a WebSocket client.', '702': 'Failed to open a WebSocket connection: did not receive a valid HTTP request.', '703': 'Failed to open a WebSocket connection: missing Sec-WebSocket-Key header.', '704': 'Failed to open a WebSocket connection: missing Sec-WebSocket-Key header.', '705': 'Failed to open a WebSocket connection: missing Sec-WebSocket-Key header.'},
-    # URL #7: Ratchet (port 8085 of WebSockets-Playground)
-    {'100': 0, '101': 0, '102': 0, '103': 0, '104': 'Ratchet detected', '105': 'Ratchet detected',
-        '200': 'Ratchet detected an invalid reserve code', '201': 'Ratchet detected an invalid reserve code', '202': 'Ratchet detected an invalid reserve code', '203': 'Ratchet detected an invalid reserve code', '204': 'Ratchet detected an invalid reserve code', '205': 'Ratchet detected an invalid reserve code', '206': 'Ratchet detected an invalid reserve code',
-        '300': 0, '301': 0, '302': 1, '303': 1, '304': 1, '305': 1, '306': 0, '307': 1, '308': 1, '309': 2, '310': 0,
-        '400': 0, '401': 0, '402': 0, '403': 0, '404': 0, '405': 0,
-        '500': -1, '501': -1,
-        '600': 1, '601': 1, '602': 1, '603': 1, '604': 1, '605': 1, '606': 0, '607': 0, '608': 0, '609': 0, '610': 0, '611': 0, '612': 0,
-        '700': 0, '701': 0, '702': 0, '703': 0, '704': 0, '705': 0},
-    # URL #8: Tornado (port 3000 of WebSockets-Playground)
-    {'100': 0, '101': 0, '102': 0, '103': 0, '104': 0, '105': 1,
-        '200': 0, '201': 0, '202': 0, '203': 0, '204': 0, '205': 0, '206': 0,
-        '300': 1, '301': 1, '302': 0, '303': 0, '304': 0, '305': 1, '306': 1, '307': 0, '308': 0, '309': 0, '310': 0,
-        '400': 0, '401': 0, '402': 0, '403': 0, '404': 0, '405': 0,
-        '500': 0, '501': 0,
-        '600': 0, '601': 0, '602': 0, '603': 0, '604': 0, '605': 0, '606': 0, '607': 0, '608': 0, '609': 0, '610': 0, '611': 0, '612': 0,
-        '700': 0, '701': 0, '702': 0, '703': 0, '704': 0, '705': 0}
+        # URL #1: NodeJS ws (port 8081 of WebSockets-Playground)
+        {'100': 1, '101': 1, '102': 1, '103': 1, '104': 1, '105': 1,
+         '200': 1, '201': 1, '202': 1, '203': 1, '204': 1, '205': 1, '206': 1,
+         '300': 0, '301': 1, '302': 0, '303': 0, '304': 0, '305': 1, '306': 0, '307': 0, '308': 0, '309': 0, '310': 0,
+         '400': 0, '401': 0, '402': 0, '403': 0, '404': 0, '405': 0,
+         '500': 'MBWS.huawei.com', '501': 'ISYSUB',
+         '600': 0, '601': 0, '602': 0, '603': 0, '604': 0, '605': 0, '606': 0, '607': 0, '608': 0, '609': 0, '610': 0, '611': 0, '612': 0,
+         '700': 'Bad Request', '701': 'Bad Request', '702': '400', '703': 'Bad Request', '704': 'Bad Request', '705': 'Bad Request'},
+        # URL #2: faye (port 7000 of WebSockets-Playground)
+        {'100': 1, '101': 1, '102': 0, '103': 0, '104': 'Received unexpected continuation frame', '105': 1,
+         '200': 'One or more reserved bits are on: reserved1 = 0, reserved2 = 0, reserved3 = 1', '201': 'One or more reserved bits are on: reserved1 = 0, reserved2 = 0, reserved3 = 1', '202': 'One or more reserved bits are on: reserved1 = 0, reserved2 = 0, reserved3 = 1', '203': 'One or more reserved bits are on: reserved1 = 0, reserved2 = 0, reserved3 = 1', '204': 'One or more reserved bits are on: reserved1 = 0, reserved2 = 0, reserved3 = 1', '205': 'One or more reserved bits are on: reserved1 = 0, reserved2 = 0, reserved3 = 1', '206': 'One or more reserved bits are on: reserved1 = 0, reserved2 = 0, reserved3 = 1',
+         '300': 1, '301': 1, '302': 1, '303': 1, '304': 1, '305': 1, '306': 0, '307': 1, '308': 1, '309': 0, '310': 0,
+         '400': 0, '401': 0, '402': 0, '403': 0, '404': 0, '405': 0,
+         '500': 0, '501': 0,
+         '600': 1, '601': 1, '602': 1, '603': 1, '604': 1, '605': 1, '606': 1, '607': 1, '608': 0, '609': 0, '610': 0, '611': 0, '612': 0,
+         '700': '101', '701': '101', '702': '400', '703': '101', '704': 'yTFHc]O', '705': '101'},
+        # URL #3: Gorilla (port 8084 of WebSockets-Playground)
+        {'100': 1, '101': 1, '102': 0, '103': 0, '104': 'continuation after final message frame', '105': 1,
+         '200': 'unexpected reserved bits 0x10', '201': 'unexpected reserved bits 0x10', '202': 'unexpected reserved bits 0x10', '203': 'unexpected reserved bits 0x10', '204': 'unexpected reserved bits 0x10', '205': 'unexpected reserved bits 0x10', '206': 'unexpected reserved bits 0x10',
+         '300': 0, '301': 0, '302': 0, '303': 1, '304': 0, '305': 0, '306': 0, '307': 0, '308': 0, '309': 0, '310': 0,
+         '400': 0, '401': 0, '402': 0, '403': 0, '404': 0, '405': 0,
+         '500': 0, '501': 0,
+         '600': 0, '601': 0, '602': 0, '603': 0, '604': 0, '605': 0, '606': 0, '607': 0, '608': 0, '609': 0, '610': 0, '611': 0, '612': 0,
+         '700': 'Bad Request', '701': 'Bad Request', '702': '400 Bad Request', '703': 'Bad Request', '704': 'Bad Request', '705': '400 Bad Request: missing required Host header'},
+        # URL #4: uWebSockets (port 9001 of WebSockets-Playground)
+        {'100': 1, '101': 1, '102': 0, '103': 0, '104': 0, '105': 1,
+         '200': 0, '201': 0, '202': 0, '203': 0, '204': 0, '205': 0, '206': 0,
+         '300': 1, '301': 1, '302': 1, '303': 1, '304': 1, '305': 1, '306': 0, '307': 1, '308': 1, '309': 1, '310': 0,
+         '400': 'permessage-deflate; client_no_context_takeover; server_no_context_takeover', '401': 'permessage-deflate; client_no_context_takeover; server_no_context_takeover', '402': 'permessage-deflate; client_no_context_takeover; server_no_context_takeover', '403': 'permessage-deflate; client_no_context_takeover; server_no_context_takeover', '404': 'permessage-deflate; client_no_context_takeover; server_no_context_takeover', '405': 'permessage-deflate; client_no_context_takeover; server_no_context_takeover',
+         '500': 'MBWS.huawei.com', '501': 'ISYSUB',
+         '600': 1, '601': 1, '602': 1, '603': 1, '604': 1, '605': 1, '606': 0, '607': 0, '608': 0, '609': 0, '610': 0, '611': 0, '612': 0,
+         '700': '101', '701': '101', '702': 0, '703': 0, '704': 0, '705': 0},
+        # URL #5: Java Spring boot (port 8080 of WebSockets-Playground)
+        {'100': 0, '101': 0, '102': 0, '103': 0, '104': 'A WebSocket frame was sent with an unrecognised opCode of [0]', '105': 'The client sent a close frame with a single byte payload which is not valid',
+         '200': 'The client frame set the reserved bits to [1] for a message with opCode [2] which was not supported by this endpoint', '201': 'The client frame set the reserved bits to [1] for a message with opCode [2] which was not supported by this endpoint', '202': 'The client frame set the reserved bits to [1] for a message with opCode [2] which was not supported by this endpoint', '203': 'The client frame set the reserved bits to [1] for a message with opCode [2] which was not supported by this endpoint', '204': 'The client frame set the reserved bits to [1] for a message with opCode [2] which was not supported by this endpoint', '205': 'The client frame set the reserved bits to [1] for a message with opCode [2] which was not supported by this endpoint', '206': 'The client frame set the reserved bits to [1] for a message with opCode [2] which was not supported by this endpoint',
+         '300': 0, '301': 0, '302': 0, '303': 0, '304': 0, '305': 0, '306': 1, '307': 0, '308': 0, '309': 0, '310': 0,
+         '400': 'permessage-deflate', '401': 'permessage-deflate', '402': 'permessage-deflate', '403': 'permessage-deflate', '404': 'permessage-deflate', '405': 'permessage-deflate',
+         '500': 0, '501': 0,
+         '600': 0, '601': 0, '602': 0, '603': 0, '604': 0, '605': 0, '606': 0, '607': 0, '608': 0, '609': 0, '610': 0, '611': 0, '612': 0,
+         '700': '426', '701': 'Can "Upgrade" only to "WebSocket".', '702': 'Bad Request', '703': '403', '704': 'Bad Request', '705': 'Bad Request'},
+        # URL #6: Python websockets (port 8765 of WebSockets-Playground)
+        {'100': 1, '101': 1, '102': 0, '103': 0, '104': 1, '105': 1,
+         '200': 1, '201': 1, '202': 1, '203': 1, '204': 1, '205': 1, '206': 1,
+         '300': 0, '301': 0, '302': 0, '303': 0, '304': 0, '305': 0, '306': 0, '307': 0, '308': 0, '309': 3, '310': 0,
+         '400': -1, '401': -1, '402': -1, '403': -1, '404': -1, '405': -1,
+         '500': 0, '501': 0,
+         '600': 0, '601': 0, '602': 0, '603': 0, '604': 0, '605': 0, '606': 0, '607': 0, '608': 0, '609': 0, '610': 0, '611': 0, '612': 0,
+         '700': 'Failed to open a WebSocket connection: empty Sec-WebSocket-Version header.', '701': 'You cannot access a WebSocket server directly with a browser. You need a WebSocket client.', '702': 'Failed to open a WebSocket connection: did not receive a valid HTTP request.', '703': 'Failed to open a WebSocket connection: missing Sec-WebSocket-Key header.', '704': 'Failed to open a WebSocket connection: missing Sec-WebSocket-Key header.', '705': 'Failed to open a WebSocket connection: missing Sec-WebSocket-Key header.'},
+        # URL #7: Ratchet (port 8085 of WebSockets-Playground)
+        {'100': 0, '101': 0, '102': 0, '103': 0, '104': 'Ratchet detected', '105': 'Ratchet detected',
+         '200': 'Ratchet detected an invalid reserve code', '201': 'Ratchet detected an invalid reserve code', '202': 'Ratchet detected an invalid reserve code', '203': 'Ratchet detected an invalid reserve code', '204': 'Ratchet detected an invalid reserve code', '205': 'Ratchet detected an invalid reserve code', '206': 'Ratchet detected an invalid reserve code',
+         '300': 0, '301': 0, '302': 1, '303': 1, '304': 1, '305': 1, '306': 0, '307': 1, '308': 1, '309': 2, '310': 0,
+         '400': 0, '401': 0, '402': 0, '403': 0, '404': 0, '405': 0,
+         '500': -1, '501': -1,
+         '600': 1, '601': 1, '602': 1, '603': 1, '604': 1, '605': 1, '606': 0, '607': 0, '608': 0, '609': 0, '610': 0, '611': 0, '612': 0,
+         '700': 0, '701': 0, '702': 0, '703': 0, '704': 0, '705': 0},
+        # URL #8: Tornado (port 3000 of WebSockets-Playground)
+        {'100': 0, '101': 0, '102': 0, '103': 0, '104': 0, '105': 1,
+         '200': 0, '201': 0, '202': 0, '203': 0, '204': 0, '205': 0, '206': 0,
+         '300': 1, '301': 1, '302': 0, '303': 0, '304': 0, '305': 1, '306': 1, '307': 0, '308': 0, '309': 0, '310': 0,
+         '400': 0, '401': 0, '402': 0, '403': 0, '404': 0, '405': 0,
+         '500': 0, '501': 0,
+         '600': 0, '601': 0, '602': 0, '603': 0, '604': 0, '605': 0, '606': 0, '607': 0, '608': 0, '609': 0, '610': 0, '611': 0, '612': 0,
+         '700': 0, '701': 0, '702': 0, '703': 0, '704': 0, '705': 0}
     ]
     dbServers = ["NodeJS ws", "Faye", "Gorilla", "uWebSockets", "Java Spring boot", "Python websockets", "Ratchet", "Python Tornado"]
     if len(fingerprintDB) != len(dbServers):
@@ -978,13 +1025,13 @@ def identify_fingerprint(unknown_fingerprint):
     print("Identifying...")
     print("=======================================================")
     equalityCases = ['100', '101', '102', '103',
-        '300', '301', '302', '303', '304', '305', '306', '307', '308', '309', '310',
-        '400', '401', '402', '403', '404', '405',
-        '500', '501',
-        '600', '601', '602', '603', '604', '605', '606', '607', '608', '609', '609', '610', '611', '612']
+                     '300', '301', '302', '303', '304', '305', '306', '307', '308', '309', '310',
+                     '400', '401', '402', '403', '404', '405',
+                     '500', '501',
+                     '600', '601', '602', '603', '604', '605', '606', '607', '608', '609', '609', '610', '611', '612']
     containCases = ['104', '105',
-        '200', '201', '202', '203', '204', '205', '206',
-        '700', '701', '702', '703', '704', '705']
+                    '200', '201', '202', '203', '204', '205', '206',
+                    '700', '701', '702', '703', '704', '705']
     for fprint in fingerprintDB:
         delta = 0
         for testcase in equalityCases:
@@ -999,9 +1046,9 @@ def identify_fingerprint(unknown_fingerprint):
     max_delta = 0
     for key in unknown_fingerprint:
         if key in equalityCases:
-            max_delta += 1 # Account for weighting in resultsEqual function
+            max_delta += 1  # Account for weighting in resultsEqual function
         elif key in containCases:
-            max_delta += 2 # Account for weighting in resultsContain function
+            max_delta += 2  # Account for weighting in resultsContain function
     candidate_index = fprintDeltas.index(min(fprintDeltas))
     print("List of deltas between detected fingerprint and those in database")
     print(fprintDeltas)
@@ -1014,6 +1061,7 @@ def identify_fingerprint(unknown_fingerprint):
     print("=======================================================")
     print("Tested server's fingerprint: ")
     print(unknown_fingerprint)
+
 
 def main():
     global debug
@@ -1071,6 +1119,7 @@ def main():
         # Identify fingerprint, unless generating one
         if args.generate_fingerprint is False:
             identify_fingerprint(final_fingerprint)
+
 
 if __name__ == "__main__":
     try:
