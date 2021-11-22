@@ -632,7 +632,7 @@ def send_req(req, wsurl, opts):
 
     # Prepare socket
     data = ""
-    context = ssl.SSLContext(opts.get('ssl_version', ssl.PROTOCOL_TLS))
+    context = ssl.SSLContext(opts.get('ssl_version', ssl.PROTOCOL_TLS_CLIENT))
     context.verify_mode = opts.get('cert_reqs', ssl.CERT_NONE)
 
     if urlparse(wsurl).scheme == "wss":
