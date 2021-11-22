@@ -573,6 +573,8 @@ def max_payloads(verbose, ws, wsurl, opts, options):
     return results_6xx
 
 def run_6xx_tests(verbose, ws, wsurl, opts, options):
+    if debug:
+        print("test 600")
     results_6xx = max_payloads(verbose, ws, wsurl, opts, options)
     return results_6xx
 
@@ -588,7 +590,6 @@ def send_req(req, wsurl, opts):
     port = urlparse(wsurl).port or (80 if urlparse(wsurl).scheme == "ws" else 443)
 
     # Prepare socket
-    ssock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     data=""
     context = ssl.SSLContext(opts.get('ssl_version', ssl.PROTOCOL_TLS))
     context.verify_mode = opts.get('cert_reqs', ssl.CERT_NONE)
@@ -599,6 +600,13 @@ def send_req(req, wsurl, opts):
             with context.wrap_socket(sock, server_hostname=host) as ssock:
                 ssock.sendall(req) # ssock.connect((host, int(port)))
                 data = ssock.recv(4096)
+    elif urlparse(wsurl).scheme == "ws":
+        ssock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        ssock.connect((host, int(port)))
+        ssock.send(req)
+        data = ssock.recv(4096)
+    else:
+        raise Exception("ERROR: neither wss or ws protocol scheme detected")
 
     response = ""
 
@@ -678,7 +686,7 @@ def test_702(ws, wsurl, opts, options):
 
 def test_703(ws, wsurl, opts, options):
     if debug:
-        print("test 702")
+        print("test 703")
     path = urlparse(wsurl).path or "/"
     # hybi-XX connection attempt
     req = (
@@ -696,7 +704,7 @@ def test_703(ws, wsurl, opts, options):
 
 def test_704(ws, wsurl, opts, options):
     if debug:
-        print("test 700")
+        print("test 704")
     path = urlparse(wsurl).path or "/"
     # hybi-76 connection attempt
     req = (
@@ -714,7 +722,7 @@ def test_704(ws, wsurl, opts, options):
 
 def test_705(ws, wsurl, opts, options):
     if debug:
-        print("test 701")
+        print("test 705")
     path = urlparse(wsurl).path or "/"
     # hybi-76, no Host header
     req = (
