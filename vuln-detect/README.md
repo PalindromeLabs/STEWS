@@ -21,16 +21,17 @@ First, make sure you have the necessary Python 3 dependencies installed using
 `python3 STEWS-vuln-detect.py -h` you will be greeted by the following options:
 
 ```
-usage: STEWS-vuln-detect.py [-h] [-v] [-u URL] [-f FILE] [-n] [-k] [-o ORIGIN] [-1] [-2] [-3] [-4] [-5]
+usage: STEWS-vuln-detect.py [-h] [-v] [-d] [-u URL] [-f FILE] [-n] [-k] [-o ORIGIN] [-1] [-2] [-3] [-4]
 
-Security Testing and Enumeration of WebSockets (STEWS) Tool
+Security Testing and Enumeration of WebSockets (STEWS) Vulnerability Detection Tool
 
 optional arguments:
   -h, --help            show this help message and exit
   -v, --verbose         Enable verbose tracing of communications
+  -d, --debug           Print each test case to track progress while running
   -u URL, --url URL     URL to connect to
   -f FILE, --file FILE  File containing URLs to check for valid WebSocket connections
-  -n, --no-encryption   Connect using ws://, not wss://
+  -n, --no-encryption   Connect using ws://, not wss:// (default is wss://)
   -k, --nocert          Ignore invalid SSL cert
   -o ORIGIN, --origin ORIGIN
                         Set origin

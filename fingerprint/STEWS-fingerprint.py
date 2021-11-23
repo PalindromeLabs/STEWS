@@ -1022,7 +1022,7 @@ def identify_fingerprint(unknown_fingerprint):
     fprintDeltas = []
 
     print("=======================================================")
-    print("Identifying...")
+    cprint.info("Identifying...")
     print("=======================================================")
     equalityCases = ['100', '101', '102', '103',
                      '300', '301', '302', '303', '304', '305', '306', '307', '308', '309', '310',
@@ -1053,8 +1053,8 @@ def identify_fingerprint(unknown_fingerprint):
     print("List of deltas between detected fingerprint and those in database")
     print(fprintDeltas)
     print("=======================================================")
-    print(">>>Most likely server: " + first_best_match(fprintDeltas, dbServers, max_delta))
-    print(">>>Second most likely server: " + second_best_match(fprintDeltas, dbServers, max_delta))
+    cprint.info(">>>Most likely server: " + first_best_match(fprintDeltas, dbServers, max_delta))
+    cprint.info(">>>Second most likely server: " + second_best_match(fprintDeltas, dbServers, max_delta))
     print("=======================================================")
     print("Most likely server's fingerprint: ")
     print(fingerprintDB[candidate_index])

@@ -7,6 +7,8 @@ features both in the WebSocket handshake (using the HTTP protocol)
 and in the WebSocket protocol frames (using the WebSocket protocol),
 requiring the tool to handle two different protocols.
 
+![Example STEWS fingerprinting output](fingerprint-example.jpg)
+
 ## WebSockets Fingerprint Tests
 
 In the process of testing different WebSocket servers, differences in
@@ -70,6 +72,11 @@ If you have a server running on local port 8080
 and want to test the 500 series of test cases, you might use:
 
 `python3 STEWS-fingerprint.py -5 -d -n -u 127.0.0.1:8080`
+
+If instead you wish to test a public server using TLS and do
+not want to see the verbose debug info, you might use:
+
+`python3 STEWS-fingerprint.py -1 -k -u streamer.finance.yahoo.com`
 
 Running all test cases with the `-a` flag provides the most precise fingerprint
 matching, but it can also take a lot of time and require sending a lot of data
