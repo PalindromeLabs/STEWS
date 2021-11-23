@@ -957,7 +957,7 @@ def identify_fingerprint(unknown_fingerprint):
          '300': 0, '301': 1, '302': 0, '303': 0, '304': 0, '305': 1, '306': 0, '307': 0, '308': 0, '309': 0, '310': 0,
          '400': 0, '401': 0, '402': 0, '403': 0, '404': 0, '405': 0,
          '500': 'MBWS.huawei.com', '501': 'ISYSUB',
-         '600': 0, '601': 0, '602': 0, '603': 0, '604': 0, '605': 0, '606': 0, '607': 0, '608': 0, '609': 0, '610': 0, '611': 0, '612': 0,
+         '600': 1, '601': 1, '602': 1, '603': 1, '604': 1, '605': 1, '606': 1, '607': 1, '608': 1, '609': 1, '610': 1, '611': 1, '612': 0,
          '700': 'Bad Request', '701': 'Bad Request', '702': '400', '703': 'Bad Request', '704': 'Bad Request', '705': 'Bad Request'},
         # URL #2: faye (port 7000 of WebSockets-Playground)
         {'100': 1, '101': 1, '102': 0, '103': 0, '104': 'Received unexpected continuation frame', '105': 1,
@@ -966,7 +966,7 @@ def identify_fingerprint(unknown_fingerprint):
          '400': 0, '401': 0, '402': 0, '403': 0, '404': 0, '405': 0,
          '500': 0, '501': 0,
          '600': 1, '601': 1, '602': 1, '603': 1, '604': 1, '605': 1, '606': 1, '607': 1, '608': 0, '609': 0, '610': 0, '611': 0, '612': 0,
-         '700': '101', '701': '101', '702': '400', '703': '101', '704': 'yTFHc]O', '705': '101'},
+         '700': 'Unsupported WebSocket version', '701': 'Not a WebSocket request', '702': '400', '703': '101', '704': 'yTFHc]O', '705': '101'},
         # URL #3: Gorilla (port 8084 of WebSockets-Playground)
         {'100': 1, '101': 1, '102': 0, '103': 0, '104': 'continuation after final message frame', '105': 1,
          '200': 'unexpected reserved bits 0x10', '201': 'unexpected reserved bits 0x10', '202': 'unexpected reserved bits 0x10', '203': 'unexpected reserved bits 0x10', '204': 'unexpected reserved bits 0x10', '205': 'unexpected reserved bits 0x10', '206': 'unexpected reserved bits 0x10',
@@ -997,7 +997,7 @@ def identify_fingerprint(unknown_fingerprint):
          '300': 0, '301': 0, '302': 0, '303': 0, '304': 0, '305': 0, '306': 0, '307': 0, '308': 0, '309': 3, '310': 0,
          '400': -1, '401': -1, '402': -1, '403': -1, '404': -1, '405': -1,
          '500': 0, '501': 0,
-         '600': 0, '601': 0, '602': 0, '603': 0, '604': 0, '605': 0, '606': 0, '607': 0, '608': 0, '609': 0, '610': 0, '611': 0, '612': 0,
+         '600': 1, '601': 1, '602': 1, '603': 0, '604': 0, '605': 0, '606': 0, '607': 0, '608': 0, '609': 0, '610': 0, '611': 0, '612': 0,
          '700': 'Failed to open a WebSocket connection: empty Sec-WebSocket-Version header.', '701': 'You cannot access a WebSocket server directly with a browser. You need a WebSocket client.', '702': 'Failed to open a WebSocket connection: did not receive a valid HTTP request.', '703': 'Failed to open a WebSocket connection: missing Sec-WebSocket-Key header.', '704': 'Failed to open a WebSocket connection: missing Sec-WebSocket-Key header.', '705': 'Failed to open a WebSocket connection: missing Sec-WebSocket-Key header.'},
         # URL #7: Ratchet (port 8085 of WebSockets-Playground)
         {'100': 0, '101': 0, '102': 0, '103': 0, '104': 'Ratchet detected', '105': 'Ratchet detected',
@@ -1014,7 +1014,7 @@ def identify_fingerprint(unknown_fingerprint):
          '400': 0, '401': 0, '402': 0, '403': 0, '404': 0, '405': 0,
          '500': 0, '501': 0,
          '600': 0, '601': 0, '602': 0, '603': 0, '604': 0, '605': 0, '606': 0, '607': 0, '608': 0, '609': 0, '610': 0, '611': 0, '612': 0,
-         '700': 0, '701': 0, '702': 0, '703': 0, '704': 0, '705': 0}
+         '700': '426', '701': 'Can "Upgrade" only to "WebSocket"', '702': '400', '703': '426', '704': '426', '705': '426'}
     ]
     dbServers = ["NodeJS ws", "Faye", "Gorilla", "uWebSockets", "Java Spring boot", "Python websockets", "Ratchet", "Python Tornado"]
     if len(fingerprintDB) != len(dbServers):
