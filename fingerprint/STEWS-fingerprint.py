@@ -65,7 +65,7 @@ def print_opcode(opcode, recvdata):
 
 def ws_reconnect(ws, wsurl, opts, options):
     try:
-        ws.connect(wsurl, skip_utf8_validation=True, sslopt=opts, timeout=cntn_timeout, **options)
+        ws.connect(wsurl, skip_utf8_validation=True, timeout=cntn_timeout, **options)
     except Exception as e:
         print("Exception while attempting reconnection: ", e)
 
@@ -630,12 +630,12 @@ def send_req(req, wsurl, opts):
     host = urlparse(wsurl).hostname
     port = urlparse(wsurl).port or (80 if urlparse(wsurl).scheme == "ws" else 443)
 
-    # Prepare socket
     data = ""
-    context = ssl.SSLContext(opts.get('ssl_version', ssl.PROTOCOL_TLS_CLIENT))
-    context.verify_mode = opts.get('cert_reqs', ssl.CERT_NONE)
 
     if urlparse(wsurl).scheme == "wss":
+        context = ssl.SSLContext(opts.get('ssl_version', ssl.PROTOCOL_TLS_CLIENT))
+        context.check_hostname = opts.get('check_hostname', True)
+        context.verify_mode = opts.get('cert_reqs', ssl.CERT_REQUIRED)
         with socket.create_connection((host, port)) as sock:
             sock.settimeout(cntn_timeout)
             with context.wrap_socket(sock, server_hostname=host) as ssock:
@@ -811,7 +811,7 @@ def run_tests(arguments):
 
     # Set SSL options if certs should be ignored
     if args.nocert:
-        opts = {"cert_reqs": ssl.CERT_NONE, "check_hostname": False}
+        opts = {"check_hostname": False, "cert_reqs": ssl.CERT_NONE}
 
     # Set origin if none is provided
     if args.origin is None:
@@ -973,7 +973,7 @@ def identify_fingerprint(unknown_fingerprint):
          '300': 0, '301': 0, '302': 0, '303': 1, '304': 0, '305': 0, '306': 0, '307': 0, '308': 0, '309': 0, '310': 0,
          '400': 0, '401': 0, '402': 0, '403': 0, '404': 0, '405': 0,
          '500': 0, '501': 0,
-         '600': 0, '601': 0, '602': 0, '603': 0, '604': 0, '605': 0, '606': 0, '607': 0, '608': 0, '609': 0, '610': 0, '611': 0, '612': 0,
+         '600': 1, '601': 1, '602': 1, '603': 1, '604': 1, '605': 1, '606': 1, '607': 1, '608': 1, '609': 1, '610': 1, '611': 1, '612': 1,
          '700': 'Bad Request', '701': 'Bad Request', '702': '400 Bad Request', '703': 'Bad Request', '704': 'Bad Request', '705': '400 Bad Request: missing required Host header'},
         # URL #4: uWebSockets (port 9001 of WebSockets-Playground)
         {'100': 1, '101': 1, '102': 0, '103': 0, '104': 0, '105': 1,
@@ -1013,7 +1013,7 @@ def identify_fingerprint(unknown_fingerprint):
          '300': 1, '301': 1, '302': 0, '303': 0, '304': 0, '305': 1, '306': 1, '307': 0, '308': 0, '309': 0, '310': 0,
          '400': 0, '401': 0, '402': 0, '403': 0, '404': 0, '405': 0,
          '500': 0, '501': 0,
-         '600': 0, '601': 0, '602': 0, '603': 0, '604': 0, '605': 0, '606': 0, '607': 0, '608': 0, '609': 0, '610': 0, '611': 0, '612': 0,
+         '600': 1, '601': 1, '602': 1, '603': 1, '604': 1, '605': 0, '606': 0, '607': 0, '608': 0, '609': 0, '610': 0, '611': 0, '612': 0,
          '700': '426', '701': 'Can "Upgrade" only to "WebSocket"', '702': '400', '703': '426', '704': '426', '705': '426'}
     ]
     dbServers = ["NodeJS ws", "Faye", "Gorilla", "uWebSockets", "Java Spring boot", "Python websockets", "Ratchet", "Python Tornado"]
