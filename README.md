@@ -5,7 +5,7 @@
 STEWS is a tool suite for security testing of WebSockets
 
 This research was first presented at
-[OWASP Global AppSec US 2021](https://owaspglobalappsecus2021.sched.com/event/n98a/were-not-in-http-anymore-investigating-websocket-server-security)
+[OWASP Global AppSec US 2021](https://www.youtube.com/watch?v=bMFP71UAbPo)
 
 ## Features
 STEWS provides the ability to:
